@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BackendLogic.Features.ImportMessage;
+using DataAccess.Features;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -26,6 +29,8 @@ namespace WhatsAppAnalytics
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddScoped<IGenericRepository<Import>, ImportRepository>();
+            services.AddScoped<IImportService, ImportMessageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
