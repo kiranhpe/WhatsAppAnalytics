@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 namespace DataAccess.Models
 {
-    public partial class RawData    {
+    public partial class RawDatum
+    {
         public long Id { get; set; }
         public int ImportId { get; set; }
         public DateTime ChatDateTime { get; set; }

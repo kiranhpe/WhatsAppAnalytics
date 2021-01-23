@@ -32,14 +32,21 @@ namespace WhatsAppAnalyticsAPI.Controllers
         [HttpGet("{id}", Name = "Get")]
         public string Get(int id)
         {
-            m_importService.InsertImports();
             return "";
         }
 
         // POST: api/Import
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post()
         {
+            try
+            {
+                return Ok(m_importService.InsertImports());
+            }
+            catch(Exception exp)
+            {
+                return BadRequest(exp.Message);
+            }
         }
 
         // PUT: api/Import/5

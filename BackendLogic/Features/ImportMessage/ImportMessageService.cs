@@ -9,51 +9,95 @@ namespace BackendLogic.Features.ImportMessage
 {
     public class ImportMessageService : IImportService
     {
-        private readonly IGenericRepository<Import> m_genericRepository;
-        public ImportMessageService(IGenericRepository<Import> genericRepository)
+        private readonly IImportRepository m_importRepository;
+        public ImportMessageService(IImportRepository importRepository)
         {
-            m_genericRepository = genericRepository;
+            m_importRepository = importRepository;
         }
         public List<Import> GetImports()
         {
-            return this.m_genericRepository.GetData(new Import() { });
+            return this.m_importRepository.GetImportData(new Import() { });
         }
 
-        public void InsertImports()
+        public Import InsertImports()
         {
-            var chats = new List<RawData>();
+            var import = InsertImportData();
 
-            foreach(var item in GetChatsFromFile())
+            try
             {
-                var chat = new RawData()
-                {
-                    ImportId = 3,
-                    Chat = GetChatMesseage(item),
-                    ChatDateTime = GetChatDateTime(item)
-                };
+                var chats = new List<RawDatum>();
 
-                chats.Add(chat);
+                var chatsFromFile = GetChatsFromFile();
+
+                var defaultDate = DateTime.ParseExact("01/01/01", "dd/MM/yy", CultureInfo.InvariantCulture);
+
+                for (var i = 0; i < chatsFromFile.Length; i++)
+                {
+                    var chat = new RawDatum()
+                    {
+                        ImportId = import.Id,
+                        Chat = GetChatMesseage(chatsFromFile[i]) ?? GetChatMesseage(chatsFromFile[i - 1] + chatsFromFile[i]),
+                        ChatDateTime = GetChatDateTime(chatsFromFile[i]) == defaultDate ? GetChatDateTime(chatsFromFile[i - 1] + chatsFromFile[i]) : GetChatDateTime(chatsFromFile[i])
+                    };
+
+                    chats.Add(chat);
+                }
+                m_importRepository.InsertRawtData(chats);
+
+                UpdateImportData(import.Id, 1);
+
+                return import;
             }
+            catch(Exception exp)
+            {
+                UpdateImportData(import.Id, 3);
+
+                return null;
+            }
+            
         }
 
         private string[] GetChatsFromFile()
         {
-            string[] lines = System.IO.File.ReadAllLines(@"D:\Work\WhatsAppAnalytics\WhatsAppChatwithMounica.txt");
+           // string[] lines = System.IO.File.ReadAllLines(@"D:\Work\WhatsAppAnalytics\WhatsAppChatwithMounica.txt");
+            string[] lines = System.IO.File.ReadAllLines(@"D:\Work\WhatsAppAnalytics\WhatsAppChatwithHarshi.txt");
+
 
             return lines;
         }
 
         private string GetChatMesseage(string message)
         {
-            return message.Substring(message.IndexOf('-')).Trim();
+
+            if(message.IndexOf(" - ") > -1)
+            {
+                return message.Substring(message.IndexOf('-')).Replace("-","").Trim();
+            }
+            return null;
         }
 
         private DateTime GetChatDateTime(string message)
         {
-            var dateString = message.Split("-")[0].Replace(",","").ToUpper().Trim();
-            return DateTime.ParseExact(dateString, "dd/MM/yy h:mm tt", CultureInfo.InvariantCulture);
+            if (message.IndexOf(" - ") > -1)
+            {
+                var dateString = message.Split("-")[0].Replace(",", "").ToUpper().Trim();
+                return DateTime.ParseExact(dateString, "dd/MM/yy h:mm tt", CultureInfo.InvariantCulture);
+            }
+            return DateTime.ParseExact("01/01/01", "dd/MM/yy", CultureInfo.InvariantCulture);
             // "2/22/2015 9:54:02 AM"
             // "08/01/21, 11:33 am "
+        }
+
+        private Import InsertImportData()
+        {
+            var res = m_importRepository.InsertImportData(new Import() { FileName = "test", ImportedBy = "Admin", ImpotedDateTime = DateTime.Now, ImportStatusId = 2 });
+            return res;
+        }
+
+        private Import UpdateImportData(int id, int statusId)
+        {
+            var res = m_importRepository.UpdateImportData(new Import() { Id = id, FileName = "test", ImportedBy = "Admin", ImpotedDateTime = DateTime.Now, ImportStatusId = statusId });
+            return res;
         }
     }
 }

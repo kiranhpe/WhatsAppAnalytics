@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
 
@@ -10,14 +9,16 @@ namespace DataAccess.Models
     {
         public Import()
         {
-            RawData = new HashSet<RawData>();
+            RawData = new HashSet<RawDatum>();
         }
 
         public int Id { get; set; }
         public string FileName { get; set; }
         public string ImportedBy { get; set; }
         public DateTime ImpotedDateTime { get; set; }
+        public int ImportStatusId { get; set; }
 
-        public virtual ICollection<RawData> RawData { get; set; }
+        public virtual ImportStatus ImportStatus { get; set; }
+        public virtual ICollection<RawDatum> RawData { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace WhatsAppAnalytics
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddScoped<IGenericRepository<Import>, ImportRepository>();
+            services.AddScoped<IImportRepository, ImportRepository>();
             services.AddScoped<IImportService, ImportMessageService>();
         }
 

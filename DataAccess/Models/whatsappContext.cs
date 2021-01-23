@@ -7,19 +7,20 @@ using Microsoft.Extensions.Configuration;
 
 namespace DataAccess.Models
 {
-    public partial class WhatsappContext : DbContext
+    public partial class whatsappContext : DbContext
     {
-        public WhatsappContext()
+        public whatsappContext()
         {
         }
 
-        public WhatsappContext(DbContextOptions<WhatsappContext> options)
+        public whatsappContext(DbContextOptions<whatsappContext> options)
             : base(options)
         {
         }
 
         public virtual DbSet<Import> Imports { get; set; }
-        public virtual DbSet<RawData> RawData { get; set; }
+        public virtual DbSet<ImportStatus> ImportStatuses { get; set; }
+        public virtual DbSet<RawDatum> RawData { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,6 +46,8 @@ namespace DataAccess.Models
                     .IsRequired()
                     .HasColumnName("file_name");
 
+                entity.Property(e => e.ImportStatusId).HasColumnName("import_status_id");
+
                 entity.Property(e => e.ImportedBy)
                     .IsRequired()
                     .HasColumnName("imported_by");
@@ -52,9 +55,27 @@ namespace DataAccess.Models
                 entity.Property(e => e.ImpotedDateTime)
                     .HasColumnType("datetime")
                     .HasColumnName("impoted_date_time");
+
+                entity.HasOne(d => d.ImportStatus)
+                    .WithMany(p => p.Imports)
+                    .HasForeignKey(d => d.ImportStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_import_import_status");
             });
 
-            modelBuilder.Entity<RawData>(entity =>
+            modelBuilder.Entity<ImportStatus>(entity =>
+            {
+                entity.ToTable("import_status");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("status");
+            });
+
+            modelBuilder.Entity<RawDatum>(entity =>
             {
                 entity.ToTable("raw_data");
 

@@ -10,7 +10,7 @@ namespace BackendLogic.Features.ImportMessage
     {
         List<Import> GetImports();
 
-        void  InsertImports();
+        Import InsertImports();
 
     }
 }
